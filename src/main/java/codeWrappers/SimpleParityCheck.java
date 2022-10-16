@@ -6,48 +6,30 @@ import java.util.List;
 import java.util.Set;
 
 public class SimpleParityCheck implements WrapperInterface {
-
-    private boolean hasChanged = false;
-    public StringBuilder[] bitArray;
-
     private Set<Integer> chunkToResendList = new HashSet<>();
 
-    public SimpleParityCheck(StringBuilder[] bitArray) {
-        this.bitArray = bitArray;
-    }
-
     @Override
-    public boolean hasChanged() {
-        return hasChanged;
-    }
-
-    @Override
-    public void encode() {
-        if (bitArray == null || bitArray.length == 0) {
-            return;
-        }
+    public StringBuilder[] encode(StringBuilder[] bitArray) {
         int chunkN = bitArray.length;
         for (int i = 0; i < chunkN; i++) {
             bitArray[i].append(getParityBit(bitArray[i]));
         }
+        return bitArray;
     }
 
     @Override
-    public void decode(StringBuilder[] bitArray) {
-        if (bitArray == null || bitArray.length == 0) {
-            return;
-        }
+    public StringBuilder[] decode(StringBuilder[] bitArray) {
         int chunkSize = bitArray[0].length() - 1;
         int chunkN = bitArray.length;
         for (int i = 0; i < chunkN; i++) {
             StringBuilder current = bitArray[i];
             char suspectBit = getParityBit(current.substring(0,chunkSize));
             if (suspectBit != current.charAt(chunkSize)) {
-                hasChanged = true;
                 chunkToResendList.add(i);
             }
             current.setLength(chunkSize);
         }
+        return bitArray;
     }
 
     @Override

@@ -17,7 +17,7 @@ public class NoiseProducer {
         int chunkSize = cleanData[0].length();
         int chunkNumber = cleanData.length;
 
-        int bitsToContaminate = chunkSize * chunkNumber * noiseDensityPerMillionBits / 1000000;
+        int bitsToContaminate = chunkSize * chunkNumber / 1000000 * noiseDensityPerMillionBits;
         System.out.println(chunkNumber * chunkSize);
         System.out.println(bitsToContaminate);
         long maxBitIndex = chunkSize * chunkNumber;
@@ -25,20 +25,20 @@ public class NoiseProducer {
             long randomBit = ThreadLocalRandom.current().nextLong(maxBitIndex);
             int chunkId = (int) randomBit / chunkSize;
             int bitIdInsideChunk = (int) randomBit % chunkSize;
-            contaminatedData[chunkId] = flipBit(contaminatedData[0],bitIdInsideChunk);
+            contaminatedData[chunkId] = flipBit(contaminatedData[chunkId], bitIdInsideChunk);
             contaminatedChunkSet.add(chunkId);
         }
 
         return contaminatedData;
     }
 
-    private StringBuilder flipBit(StringBuilder cleanArray, int bitIndex){
-        String replaceWith = cleanArray.charAt(bitIndex)=='0'?"1":"0";
-        StringBuilder contaminatedArray = cleanArray.replace(bitIndex,bitIndex+1,replaceWith);
+    private StringBuilder flipBit(StringBuilder cleanArray, int bitIndex) {
+        String replaceWith = cleanArray.charAt(bitIndex) == '0' ? "1" : "0";
+        StringBuilder contaminatedArray = cleanArray.replace(bitIndex, bitIndex + 1, replaceWith);
         return contaminatedArray;
     }
 
-    public Set<Integer> getContaminatedChunkSet(){
+    public Set<Integer> getContaminatedChunkSet() {
         return contaminatedChunkSet;
     }
 }

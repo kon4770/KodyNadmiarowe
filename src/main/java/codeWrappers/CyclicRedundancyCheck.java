@@ -1,42 +1,45 @@
 package codeWrappers;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-public class CyclicRedundancyCheck {
+public class CyclicRedundancyCheck implements WrapperInterface {
     private String divisor = "";
-    private StringBuilder[] bitArray;
+    private Set<Integer> chunkToResendList = new HashSet<>();
 
-    public CyclicRedundancyCheck(int divisorIndex, StringBuilder[] bitArray) {
+    public CyclicRedundancyCheck(int divisorIndex) {
         Map<Integer, Integer> dividerMap = new HashMap<>();
         dividerMap.putAll(Map.of(3, 0x5, 4, 0x9, 5, 0x12, 6, 0x23, 7, 0x44, 8, 0xD3, 10, 0x3EC, 11, 0x5C2, 12, 0xC07, 13, 0x1E7A));
         dividerMap.putAll(Map.of(14, 0x3016, 15, 0x740A, 16, 0x8810, 17, 0x1B42D, 21, 0x18144C, 24, 0xAEB6E5, 30, 0x30185CE3, 32, 0x82608EDB));
-        if (divisorIndex > bitArray[0].length()) {
-            divisorIndex = bitArray[0].length();
-        }
         this.divisor = String.format("%32s", Integer.toBinaryString(dividerMap.get(divisorIndex))).strip().concat("1");
-        ;
-        this.bitArray = bitArray;
     }
 
 
-    public void encode() {
+    public StringBuilder[] encode(StringBuilder[] bitArray) {
         StringBuilder rem;
         StringBuilder divisor = new StringBuilder(this.divisor);
         for (int i = 0; i < bitArray.length; i++) {
             rem = divideDataWithDivisor(bitArray[i], divisor);
             bitArray[i].append(rem.substring(0, rem.length() - 1));
         }
+        return bitArray;
     }
 
-    public void decode() {
+    public StringBuilder[] decode(StringBuilder[] bitArray) {
         StringBuilder divisor = new StringBuilder(this.divisor);
         for (int i = 0; i < bitArray.length; i++) {
-            if(!isDataCorrect(bitArray[i], divisor)){
-                System.out.println("Mistake in " + i);
+            if (!isDataCorrect(bitArray[i], divisor)) {
+                chunkToResendList.add(i);
             }
         }
-        System.out.println("Decoding done!");
+        return bitArray;
+    }
+
+    @Override
+    public Set<Integer> getChunkToResendSet() {
+        return chunkToResendList;
     }
 
     private StringBuilder divideDataWithDivisor(StringBuilder oldData, StringBuilder divisor) {
@@ -90,7 +93,7 @@ public class CyclicRedundancyCheck {
 //        System.out.println("Koncowy " + rem);
         for (int i = 0; i < rem.length(); i++) {
             if (rem.charAt(i) != '0') {
-                System.out.println("Currupted data received...");
+//                System.out.println("Currupted data received...");
                 return false;
             }
         }

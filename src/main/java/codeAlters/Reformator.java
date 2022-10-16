@@ -1,28 +1,27 @@
 package codeAlters;
 
-import java.util.Arrays;
-
-public class BufferAndChunkSetter {
+public class Reformator {
     private int singleChunkBufferSize;
     private int chunkSize;
     private int chunkNumber;
     private int finalChunkSize;
     private int originalLength;
 
-    public BufferAndChunkSetter(int chunkSize, int singleChunkBufferSize) {
+    public Reformator(int chunkSize, int singleChunkBufferSize) {
         this.singleChunkBufferSize = singleChunkBufferSize;
         this.chunkSize = chunkSize;
     }
 
-    public StringBuilder[] divideString(String bitString) {
+    public StringBuilder[] divide(int width, int height, int[][] matrix) {
+        String bitString  = String.valueOf(getContinuesCharOfBits(width,height,matrix));
         int length = bitString.length();
         originalLength = length;
         int nWholePieces = length / chunkSize;
-        String buffer = new String("0");
+        String buffer = "0";
         buffer = buffer.repeat(singleChunkBufferSize);
         int rest = length % chunkSize;
         if (rest != 0) {
-            String endFiller = new String("0");
+            String endFiller = "0";
             endFiller = endFiller.repeat(chunkSize - rest);
             bitString = bitString.concat(endFiller);
             nWholePieces++;
@@ -40,7 +39,7 @@ public class BufferAndChunkSetter {
         return resultArray;
     }
 
-    public String extractEsenseAndMergeString(StringBuilder[] bitArray) {
+    public String extractEsseneAndMergeString(StringBuilder[] bitArray) {
         StringBuilder resultArray = new StringBuilder();
         for (int i = 0; i < chunkNumber; i++) {
             resultArray.append(bitArray[i].substring(0,chunkSize));
@@ -55,5 +54,20 @@ public class BufferAndChunkSetter {
 
     public int getFinalChunkSize() {
         return finalChunkSize;
+    }
+
+    private char[] getContinuesCharOfBits(int width, int height, int[][] matrix){
+        char[] bitArray = new char[width * height * 32];
+        int index = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                char[] singleInteger = Integer.toBinaryString(matrix[y][x]).replace(' ', '0').toCharArray();
+                for (int locIndex = 0; locIndex < 32; locIndex++) {
+                    bitArray[index + locIndex] = singleInteger[locIndex];
+                }
+                index += 32;
+            }
+        }
+        return bitArray;
     }
 }

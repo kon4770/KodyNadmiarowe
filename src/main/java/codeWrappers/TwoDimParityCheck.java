@@ -1,38 +1,24 @@
 package codeWrappers;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class TwoDimParityCheck implements WrapperInterface {
-
-    private boolean hasChanged = false;
-    private StringBuilder[] bitArray;
-
-    private int chunkSize = 0;
     private int parallelRowNumber = 0;
-
-    private Set<Integer> chunkToResendSet = new HashSet<>();
-    private Map<Integer, Integer> chunkMap = new HashMap<>();
+    private Set<Integer> chunkToResendSet = new TreeSet<>();
 
 
-    public TwoDimParityCheck(StringBuilder[] bitArray, int parallelRowNumber) {
-        this.bitArray = bitArray;
+
+    public TwoDimParityCheck(int parallelRowNumber) {
         this.parallelRowNumber = parallelRowNumber;
     }
 
     @Override
-    public boolean hasChanged() {
-        return false;
-    }
-
-    @Override
-    public void encode() {
-        SimpleParityCheck simpleParityCheck = new SimpleParityCheck(bitArray);
-        simpleParityCheck.encode();
-        bitArray = simpleParityCheck.bitArray;
-
+    public StringBuilder[] encode(StringBuilder[] bitArray) {
+        SimpleParityCheck simpleParityCheck = new SimpleParityCheck();
+        bitArray =  simpleParityCheck.encode(bitArray);
         int chunkSize = bitArray[0].length();
         StringBuilder newChunk = new StringBuilder();
         StringBuilder verticalChunk = new StringBuilder();
@@ -53,11 +39,8 @@ public class TwoDimParityCheck implements WrapperInterface {
             newChunk = new StringBuilder();
             startingBitChunkIndex += parallelRowNumber;
         }
+        return bitArray;
     }
-//
-//    private Set<Integer> normalizeSet(int rowNum){
-//        for(int i=0;i<s)
-//    }
 
     private StringBuilder[] insertX(int n, StringBuilder arr[], StringBuilder x, int pos) {
         int i;
@@ -86,26 +69,22 @@ public class TwoDimParityCheck implements WrapperInterface {
         return newArr;
     }
 
-    public StringBuilder[] getBitArrayCopy() {
-        StringBuilder[] newArray = new StringBuilder[bitArray.length];
-        for (int i = 0; i < bitArray.length; i++) {
-            newArray[i] = new StringBuilder(bitArray[i]);
+    private void normalizeChunkToResentSet(int idRemoved) {
+        chunkToResendSet.forEach(n -> {if(n>idRemoved){
+            chunkToResendSet.remove(n);
+            chunkToResendSet.add(n-1);
         }
-        return newArray;
+        });
     }
 
-
     @Override
-    public void decode(StringBuilder[] bitArray) {
-        SimpleParityCheck simpleParityCheck = new SimpleParityCheck(bitArray);
-        simpleParityCheck.decode(bitArray);
-        bitArray = simpleParityCheck.bitArray;
-        //chunkToResendSet = simpleParityCheck.getChunkToResendSet();//Nie bezposrednia konwersja
-//        chunkToResendSet.removeAll(parityChunks);
+    public StringBuilder[] decode(StringBuilder[] bitArray) {
+        SimpleParityCheck simpleParityCheck = new SimpleParityCheck();
+        bitArray = simpleParityCheck.decode(bitArray);
         int chunkSize = bitArray[0].length();
         StringBuilder newChunk = new StringBuilder();
         StringBuilder verticalChunk = new StringBuilder();
-        for (int startingBitChunkIndex = 0; startingBitChunkIndex < bitArray.length; startingBitChunkIndex+= parallelRowNumber) {
+        for (int startingBitChunkIndex = 0; startingBitChunkIndex < bitArray.length; startingBitChunkIndex += parallelRowNumber) {
             for (int bitIndex = 0; bitIndex < chunkSize; bitIndex++) {
                 for (int bitChunkIndex = 0; bitChunkIndex < parallelRowNumber; bitChunkIndex++) {
                     int currentRowBit = startingBitChunkIndex + bitChunkIndex;
@@ -123,9 +102,11 @@ public class TwoDimParityCheck implements WrapperInterface {
                     chunkToResendSet.add(i);
                 }
             }
-            bitArray = removeX(bitArray.length,bitArray,index);
+            bitArray = removeX(bitArray.length, bitArray, index);
+            normalizeChunkToResentSet(index);
             newChunk = new StringBuilder();
         }
+        return bitArray;
     }
 
     @Override
