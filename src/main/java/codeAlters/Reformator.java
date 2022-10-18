@@ -70,4 +70,18 @@ public class Reformator {
         }
         return bitArray;
     }
+
+    public int[] mergeToOneIntegerArray(int width, int height, String bitString) {
+        int index = 0;
+        int[] integerResultArray = new int[width* height];
+        for (int i = 0; i < width * height; i++) {
+            String bitSubString = bitString.substring(i * 32, i * 32 + 32);
+            int bitRepresentationStart = bitSubString.indexOf('1');
+            if (bitRepresentationStart > 0) {
+                bitSubString = bitSubString.substring(bitRepresentationStart);
+            }
+            integerResultArray[index++] = Integer.parseUnsignedInt(bitSubString, 2);
+        }
+        return integerResultArray;
+    }
 }

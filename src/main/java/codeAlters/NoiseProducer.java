@@ -1,5 +1,6 @@
 package codeAlters;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,11 +18,18 @@ public class NoiseProducer {
         int chunkSize = cleanData[0].length();
         int chunkNumber = cleanData.length;
 
-        int bitsToContaminate = chunkSize * chunkNumber / 1000000 * noiseDensityPerMillionBits;
+        BigInteger bitsToContaminate = (BigInteger.valueOf(chunkSize)
+                .multiply(BigInteger.valueOf(chunkNumber)
+                        .multiply(BigInteger.valueOf(noiseDensityPerMillionBits))
+                                .divide(BigInteger.valueOf(1000000))));
         System.out.println(chunkNumber * chunkSize);
         System.out.println(bitsToContaminate);
         long maxBitIndex = chunkSize * chunkNumber;
-        for (int i = 0; i < bitsToContaminate; i++) {
+        if (bitsToContaminate.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+            bitsToContaminate = BigInteger.valueOf(Integer.MAX_VALUE);
+        }
+        int bitsToContaminateInteger = bitsToContaminate.intValue();
+        for (int i = 0; i < bitsToContaminateInteger; i++) {
             long randomBit = ThreadLocalRandom.current().nextLong(maxBitIndex);
             int chunkId = (int) randomBit / chunkSize;
             int bitIdInsideChunk = (int) randomBit % chunkSize;

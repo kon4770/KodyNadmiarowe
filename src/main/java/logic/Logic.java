@@ -7,8 +7,8 @@ import codeWrappers.*;
 public class Logic {
     public void run() {
         PNGReader reader = new PNGReader();
-        int[][] valueMatrix = reader.readImageToIntegerArray("Kocham.png");
-        Reformator bufferAndChunk = new Reformator(9, 0);
+        int[][] valueMatrix = reader.readImageToIntegerArray("Fale.png");
+        Reformator bufferAndChunk = new Reformator(12, 0);
         StringBuilder[] bitMatrix = bufferAndChunk.divide(reader.getWidth(),reader.getHeight(),valueMatrix);
 
 
@@ -17,20 +17,10 @@ public class Logic {
         NoiseProducer noiseProducer = new NoiseProducer(5);
         StringBuilder[] dirtyEncodedMatrix = noiseProducer.introduceNoise(encodedMatrix);
         System.out.println(noiseProducer.getContaminatedChunkSet().size());
-
         StringBuilder[] decodedMatrix  = wrapper.decode(dirtyEncodedMatrix);
 
-        int index = 0;
-        int[] integerResultArray = new int[reader.getWidth() * reader.getHeight()];
         String bitString = bufferAndChunk.extractEsseneAndMergeString(decodedMatrix);
-        for (int i = 0; i < reader.getHeight() * reader.getWidth(); i++) {
-            String bitSubString = bitString.substring(i * 32, i * 32 + 32);
-            int bitRepresentationStart = bitSubString.indexOf('1');
-            if (bitRepresentationStart > 0) {
-                bitSubString = bitSubString.substring(bitRepresentationStart);
-            }
-            integerResultArray[index++] = Integer.parseUnsignedInt(bitSubString, 2);
-        }
+        int[] integerResultArray = bufferAndChunk.mergeToOneIntegerArray(reader.getWidth(),reader.getHeight(),bitString);
         PNGWriter writer = new PNGWriter(reader.getWidth(), reader.getHeight());
         writer.convertToFile(integerResultArray, "Result.png");
     }
