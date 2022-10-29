@@ -3,7 +3,7 @@ package codeWrappers;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ISBNCheck implements WrapperInterface{
+public class ISBNCheck implements WrapperInterface {
 
     boolean isISBN10 = true;
     private Set<Integer> chunkToResendList = new HashSet<>();
@@ -16,21 +16,22 @@ public class ISBNCheck implements WrapperInterface{
             for (int i = 0; i < bitArray.length; i++) {
                 int sum = 0;
                 for (int j = 0; j < 9; j++) {
-                    sum += j * bitArray[i].charAt(j);
+                    sum += (j+1) * Character.getNumericValue(bitArray[i].charAt(j));
                 }
                 int residual = sum % 11;
                 bitArray[i].append(String.format("%4s", Integer.toBinaryString(residual))
                         .replaceAll(" ", "0"));
             }
+
         } else {
             for (int i = 0; i < bitArray.length; i++) {
                 int sum = 0;
                 boolean alternator = true;
                 for (int j = 0; j < 12; j++) {
                     if (alternator) {
-                        sum += bitArray[i].charAt(j);
+                        sum += Character.getNumericValue(bitArray[i].charAt(j));
                     } else {
-                        sum += 3 * bitArray[i].charAt(j);
+                        sum += 3 * Character.getNumericValue(bitArray[i].charAt(j));
                     }
                     alternator = !alternator;
                 }
@@ -47,22 +48,23 @@ public class ISBNCheck implements WrapperInterface{
             for (int i = 0; i < bitArray.length; i++) {
                 int sum = 0;
                 for (int j = 0; j < 9; j++) {
-                    sum += j * bitArray[i].charAt(j);
+                    sum += (j+1) * Character.getNumericValue(bitArray[i].charAt(j));
                 }
-                sum += Integer.parseInt(bitArray[i].substring(9), 2);
+                sum += 10 * Integer.parseInt(bitArray[i].substring(9), 2);
                 if (sum % 11 != 0) {
                     chunkToResendList.add(i);
                 }
             }
+//            System.out.println("ohhmy");
         } else {
             for (int i = 0; i < bitArray.length; i++) {
                 int sum = 0;
                 boolean alternator = true;
                 for (int j = 0; j < 12; j++) {
                     if (alternator) {
-                        sum += bitArray[i].charAt(j);
+                        sum += Character.getNumericValue(bitArray[i].charAt(j));
                     } else {
-                        sum += 3 * bitArray[i].charAt(j);
+                        sum += 3 * Character.getNumericValue(bitArray[i].charAt(j));
                     }
                     alternator = !alternator;
                 }

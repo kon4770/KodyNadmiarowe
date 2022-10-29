@@ -1,15 +1,13 @@
 package codeWrappers;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class TwoDimParityCheck implements WrapperInterface {
     private int parallelRowNumber = 0;
     private Set<Integer> chunkToResendSet = new TreeSet<>();
-
-
+    private int additionalChunkNumber = 0;
 
     public TwoDimParityCheck(int parallelRowNumber) {
         this.parallelRowNumber = parallelRowNumber;
@@ -18,95 +16,84 @@ public class TwoDimParityCheck implements WrapperInterface {
     @Override
     public StringBuilder[] encode(StringBuilder[] bitArray) {
         SimpleParityCheck simpleParityCheck = new SimpleParityCheck();
-        bitArray =  simpleParityCheck.encode(bitArray);
-        int chunkSize = bitArray[0].length();
-        StringBuilder newChunk = new StringBuilder();
-        StringBuilder verticalChunk = new StringBuilder();
-        for (int startingBitChunkIndex = 0; startingBitChunkIndex < bitArray.length; startingBitChunkIndex++) {
-            for (int bitIndex = 0; bitIndex < chunkSize; bitIndex++) {
-                for (int bitChunkIndex = 0; bitChunkIndex < parallelRowNumber; bitChunkIndex++) {
-                    int currentRowBit = startingBitChunkIndex + bitChunkIndex;
-                    if (currentRowBit >= bitArray.length) {
-                        continue;
+        StringBuilder[] firstStageEncoded = simpleParityCheck.encode(bitArray);
+        this.additionalChunkNumber = (int)Math.ceil((float)firstStageEncoded.length / parallelRowNumber);
+        int chunkSize = firstStageEncoded[0].length();
+        int chunkNumber = firstStageEncoded.length;
+        StringBuilder[] secondStageEncoded = new StringBuilder[additionalChunkNumber];
+        int currentStartingRow = 0;
+        for (int i = 0; i < additionalChunkNumber; i++) {
+            secondStageEncoded[i] = new StringBuilder();
+            for (int currBitIndex = 0; currBitIndex < chunkSize; currBitIndex++) {
+                StringBuilder columnChunk = new StringBuilder();
+                for (int parrRowIndex = 0; parrRowIndex < parallelRowNumber; parrRowIndex++) {
+                    int currRow = currentStartingRow + parrRowIndex;
+                    if (currRow >= chunkNumber) {
+                        break;
                     }
-                    verticalChunk.append(bitArray[currentRowBit].charAt(bitIndex));
+                    columnChunk.append(firstStageEncoded[currRow].charAt(currBitIndex));
                 }
-                newChunk.append(SimpleParityCheck.getParityBit(verticalChunk));
-                verticalChunk = new StringBuilder();
+                secondStageEncoded[i].append(SimpleParityCheck.getParityBit(columnChunk));
             }
-//            parityChunks.add(Math.min(startingBitChunkIndex + parallelRowNumber, bitArray.length+1));
-            bitArray = insertX(bitArray.length, bitArray, newChunk, Math.min(startingBitChunkIndex + parallelRowNumber, bitArray.length + 1));
-            newChunk = new StringBuilder();
-            startingBitChunkIndex += parallelRowNumber;
+            currentStartingRow += parallelRowNumber;
         }
-        return bitArray;
+        return arrayMerge(firstStageEncoded, secondStageEncoded);
     }
 
-    private StringBuilder[] insertX(int n, StringBuilder arr[], StringBuilder x, int pos) {
-        int i;
-        StringBuilder[] newArr = new StringBuilder[n + 1];
-        for (i = 0; i < n + 1; i++) {
-            if (i < pos - 1)
-                newArr[i] = arr[i];
+    private StringBuilder[] arrayMerge(StringBuilder[] a, StringBuilder[] b) {
+        int a1 = a.length;
 
-            else if (i == pos - 1)
-                newArr[i] = x;
-            else
-                newArr[i] = arr[i - 1];
-        }
+        int b1 = b.length;
+
+        int c1 = a1 + b1;
+
+        StringBuilder[] c = new StringBuilder[c1];
+
+        System.arraycopy(a, 0, c, 0, a1);
+        System.arraycopy(b, 0, c, a1, b1);
+        return c;
+    }
+
+    private StringBuilder[] subArray(StringBuilder[] array, int end) {
+        StringBuilder newArr[] = Arrays.copyOf(array, end);
         return newArr;
     }
 
-    private StringBuilder[] removeX(int n, StringBuilder arr[], int posToRem) {
-        int i;
-        StringBuilder[] newArr = new StringBuilder[n - 1];
-        for (i = 0; i < n - 1; i++) {
-            if (i < posToRem)
-                newArr[i] = arr[i];
-            else
-                newArr[i] = arr[i + 1];
-        }
-        return newArr;
-    }
 
-    private void normalizeChunkToResentSet(int idRemoved) {
-        chunkToResendSet.forEach(n -> {if(n>idRemoved){
-            chunkToResendSet.remove(n);
-            chunkToResendSet.add(n-1);
+    private boolean isEqual(StringBuilder a, StringBuilder b) {
+        if (a.compareTo(b) == 0) {
+            return true;
         }
-        });
+        return false;
     }
 
     @Override
     public StringBuilder[] decode(StringBuilder[] bitArray) {
-        SimpleParityCheck simpleParityCheck = new SimpleParityCheck();
-        bitArray = simpleParityCheck.decode(bitArray);
         int chunkSize = bitArray[0].length();
-        StringBuilder newChunk = new StringBuilder();
-        StringBuilder verticalChunk = new StringBuilder();
-        for (int startingBitChunkIndex = 0; startingBitChunkIndex < bitArray.length; startingBitChunkIndex += parallelRowNumber) {
-            for (int bitIndex = 0; bitIndex < chunkSize; bitIndex++) {
-                for (int bitChunkIndex = 0; bitChunkIndex < parallelRowNumber; bitChunkIndex++) {
-                    int currentRowBit = startingBitChunkIndex + bitChunkIndex;
-                    if (currentRowBit >= bitArray.length) {
-                        continue;
+        int chunkNumber = bitArray.length - additionalChunkNumber;
+        int currentStartingRow = 0;
+        for (int i = 0; i < additionalChunkNumber; i++) {
+            StringBuilder suspectChunk = new StringBuilder();
+            for (int currBitIndex = 0; currBitIndex < chunkSize; currBitIndex++) {
+                StringBuilder columnChunk = new StringBuilder();
+                for (int parrRowIndex = 0; parrRowIndex < parallelRowNumber; parrRowIndex++) {
+                    int currRow = currentStartingRow + parrRowIndex;
+                    if (currRow >= chunkNumber) {
+                        break;
                     }
-                    verticalChunk.append(bitArray[currentRowBit].charAt(bitIndex));
+                    columnChunk.append(bitArray[currRow].charAt(currBitIndex));
                 }
-                newChunk.append(SimpleParityCheck.getParityBit(verticalChunk));
-                verticalChunk = new StringBuilder();
+                suspectChunk.append(SimpleParityCheck.getParityBit(columnChunk));
             }
-            int index = startingBitChunkIndex + parallelRowNumber;
-            if (newChunk.compareTo(bitArray[index]) != 0) {
-                for (int i = startingBitChunkIndex; i < parallelRowNumber; i++) {
-                    chunkToResendSet.add(i);
+            if (!isEqual(bitArray[chunkNumber + i], suspectChunk)) {
+                for (int chunkId = 0; chunkId < parallelRowNumber; chunkId++) {
+                    chunkToResendSet.add(currentStartingRow+chunkId);
                 }
+                chunkToResendSet.add(chunkNumber + i);
             }
-            bitArray = removeX(bitArray.length, bitArray, index);
-            normalizeChunkToResentSet(index);
-            newChunk = new StringBuilder();
+            currentStartingRow += parallelRowNumber;
         }
-        return bitArray;
+        return subArray(bitArray, chunkNumber);
     }
 
     @Override

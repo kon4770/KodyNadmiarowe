@@ -22,8 +22,6 @@ public class NoiseProducer {
                 .multiply(BigInteger.valueOf(chunkNumber)
                         .multiply(BigInteger.valueOf(noiseDensityPerMillionBits))
                                 .divide(BigInteger.valueOf(1000000))));
-        System.out.println(chunkNumber * chunkSize);
-        System.out.println(bitsToContaminate);
         long maxBitIndex = chunkSize * chunkNumber;
         if (bitsToContaminate.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
             bitsToContaminate = BigInteger.valueOf(Integer.MAX_VALUE);
@@ -36,6 +34,7 @@ public class NoiseProducer {
             contaminatedData[chunkId] = flipBit(contaminatedData[chunkId], bitIdInsideChunk);
             contaminatedChunkSet.add(chunkId);
         }
+        System.out.println(cleanData.length);
 
         return contaminatedData;
     }

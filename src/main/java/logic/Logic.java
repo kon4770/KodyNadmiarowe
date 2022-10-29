@@ -8,16 +8,18 @@ public class Logic {
     public void run() {
         PNGReader reader = new PNGReader();
         int[][] valueMatrix = reader.readImageToIntegerArray("Fale.png");
-        Reformator bufferAndChunk = new Reformator(12, 0);
+        Reformator bufferAndChunk = new Reformator(11, 0);
         StringBuilder[] bitMatrix = bufferAndChunk.divide(reader.getWidth(),reader.getHeight(),valueMatrix);
 
-
-        WrapperInterface wrapper = new ISBNCheck();
+        System.out.println(bitMatrix.length + " bitMatrix after reformator");
+        WrapperInterface wrapper = new HummingCheck();
         StringBuilder[] encodedMatrix = wrapper.encode(bitMatrix);
-        NoiseProducer noiseProducer = new NoiseProducer(5);
+        NoiseProducer noiseProducer = new NoiseProducer(1);
         StringBuilder[] dirtyEncodedMatrix = noiseProducer.introduceNoise(encodedMatrix);
         System.out.println(noiseProducer.getContaminatedChunkSet().size());
         StringBuilder[] decodedMatrix  = wrapper.decode(dirtyEncodedMatrix);
+        System.out.println(wrapper.getChunkToResendSet().size());
+        System.out.println((float)wrapper.getChunkToResendSet().size()/noiseProducer.getContaminatedChunkSet().size());
 
         String bitString = bufferAndChunk.extractEsseneAndMergeString(decodedMatrix);
         int[] integerResultArray = bufferAndChunk.mergeToOneIntegerArray(reader.getWidth(),reader.getHeight(),bitString);
