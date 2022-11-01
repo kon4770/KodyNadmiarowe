@@ -1,6 +1,8 @@
 package codeWrappers;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class HummingCheck implements WrapperInterface {
@@ -33,7 +35,7 @@ public class HummingCheck implements WrapperInterface {
             for (int index : bitsToFlip) {
                 chunk[index] = '1';
             }
-            if (onePositions.size() + bitsToFlip.size() % 2 == 1) {
+            if ((onePositions.size() + bitsToFlip.size()) % 2 == 1) {
                 chunk[0] = '1';
             }
             bitArray[i] = new StringBuilder(String.valueOf(chunk));
@@ -45,6 +47,15 @@ public class HummingCheck implements WrapperInterface {
     @Override
     public StringBuilder[] decode(StringBuilder[] bitArray) {
         Set<Integer> onePositions;
+        Map<Integer, Integer> normalizedChunkIndexes = new HashMap<>();
+        int trueIndex = 0;
+        for (int i = 0; i < bitArray[0].length(); i++) {
+            if (parityBitLocations.contains(i)) {
+                continue;
+            }
+            normalizedChunkIndexes.put(i, trueIndex);
+            trueIndex++;
+        }
         for (int i = 0; i < bitArray.length; i++) {
             char[] chunk = new char[bitArray[i].length() - parityBitLocations.size() - 1];
             onePositions = new HashSet<>();
@@ -60,14 +71,24 @@ public class HummingCheck implements WrapperInterface {
                 j++;
             }
             int xorOfSet = xorOfArray(onePositions);
-            Set<Integer> bitsToFlip = getBitsToFlip(xorOfSet);
-            for (int index : bitsToFlip) {
-                if (chunk[index] == '1') {
-                    chunk[index] = '0';
-                    onePositions.remove(index);
+            Set<Integer> falseBitsToFlip = getBitsToFlip(xorOfSet);
+            for (int falseIndex : falseBitsToFlip) {
+                Integer index = normalizedChunkIndexes.get(falseIndex);
+                if (index == null) {
+                    if (chunk[falseIndex] == '1') {
+                        onePositions.remove(falseIndex);
+                    } else {
+                        chunk[falseIndex] = '1';
+                        onePositions.add(falseIndex);
+                    }
                 } else {
-                    chunk[index] = '1';
-                    onePositions.add(index);
+                    if (chunk[index] == '1') {
+                        chunk[index] = '0';
+                        onePositions.remove(index);
+                    } else {
+                        chunk[index] = '1';
+                        onePositions.add(index);
+                    }
                 }
             }
             if (onePositions.size() % 2 == bitArray[i].charAt(0)) {
