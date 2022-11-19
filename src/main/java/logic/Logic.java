@@ -2,30 +2,29 @@ package logic;
 
 import codeAlters.NoiseProducer;
 import codeAlters.Reformator;
-import codeWrappers.ISBNCheck;
-import codeWrappers.WrapperInterface;
+import codeWrappers.*;
 
 public class Logic {
     public void run() {
         PNGReader reader = new PNGReader();
         int[][] valueMatrix = reader.readImageToIntegerArray("Fale.png");
-        Reformator bufferAndChunk = new Reformator(9, 0);
+        Reformator bufferAndChunk = new Reformator(500, 0);
         StringBuilder[] bitMatrix = bufferAndChunk.divide(reader.getWidth(), reader.getHeight(), valueMatrix);
-        //System.out.println(Arrays.toString(bitMatrix));
-        DataChecker dt = new DataChecker();
-        dt.saveData(bitMatrix);
-        //System.out.println(bitMatrix.length + " bitMatrix after reformator");
-        WrapperInterface wrapper = new ISBNCheck();
+        System.out.println(bitMatrix.length + " chunk count after reformator");
+        WrapperInterface wrapper = new HummingCheck();
         StringBuilder[] encodedMatrix = wrapper.encode(bitMatrix);
-        NoiseProducer noiseProducer = new NoiseProducer(1);
+        NoiseProducer noiseProducer = new NoiseProducer(100);
         StringBuilder[] dirtyEncodedMatrix = noiseProducer.introduceNoise(encodedMatrix);
-        //System.out.println(noiseProducer.getContaminatedChunkSet().size());
+        System.out.println(noiseProducer.getContaminatedChunkSet().size());
         StringBuilder[] decodedMatrix = wrapper.decode(dirtyEncodedMatrix);
-        dt.checkWithOriginal(decodedMatrix);
-        System.out.println(dt.getTPBrokenChunks().size());
-        System.out.println(wrapper.getChunkToResendSet().size());
-        dt.checkChunkDetectionAccuracy(wrapper.getChunkToResendSet());
-        System.out.println(dt.getFPBrokenChunks().size());
+        DataChecker dt = new DataChecker();
+        dt.checkWithOriginal(wrapper.getChunkToResendSet(), noiseProducer.getContaminatedChunkSet());
+        System.out.println("true  pos  " + dt.getTPBrokenChunks().size());
+        System.out.println((float)dt.getTPBrokenChunks().size() / dt.getSetSumSize());
+        System.out.println("false pos " + dt.getFPBrokenChunks().size());
+        System.out.println((float)dt.getFPBrokenChunks().size() / dt.getSetSumSize());
+        System.out.println("false neg " + dt.getFNBrokenChunks().size());
+        System.out.println((float)dt.getFNBrokenChunks().size() / dt.getSetSumSize());
         //System.out.println((float)wrapper.getChunkToResendSet().size()/noiseProducer.getContaminatedChunkSet().size());
 
         String bitString = bufferAndChunk.extractEsseneAndMergeString(decodedMatrix);

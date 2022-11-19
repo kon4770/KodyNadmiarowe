@@ -18,10 +18,10 @@ public class NoiseProducer {
         int chunkSize = cleanData[0].length();
         int chunkNumber = cleanData.length;
 
-        BigInteger bitsToContaminate = (BigInteger.valueOf(chunkSize)
+        BigInteger bitsToContaminate = (((BigInteger.valueOf(chunkSize)
                 .multiply(BigInteger.valueOf(chunkNumber)
-                        .multiply(BigInteger.valueOf(noiseDensityPerMillionBits))
-                                .divide(BigInteger.valueOf(1000000))));
+                        .multiply(BigInteger.valueOf(noiseDensityPerMillionBits))))
+                .divide(BigInteger.valueOf(1000000))));
         long maxBitIndex = chunkSize * chunkNumber;
         if (bitsToContaminate.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
             bitsToContaminate = BigInteger.valueOf(Integer.MAX_VALUE);

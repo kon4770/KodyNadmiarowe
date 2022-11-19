@@ -4,42 +4,27 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class DataChecker {
-
-    private StringBuilder[] orgBitArray;
     private Set<Integer> tpBrokenChunks = new HashSet<>();
     private Set<Integer> fpBrokenChunks = new HashSet<>();
+    private Set<Integer> fnBrokenChunks = new HashSet<>();
 
-    public boolean checkWithOriginal(StringBuilder[] susBitArray) {
-        int chunkSize = orgBitArray[0].length();
-        for (int chunkId = 0; chunkId < susBitArray.length; chunkId++) {
-            for (int bitIndex = 0; bitIndex < chunkSize; bitIndex++) {
-                if (susBitArray[chunkId].charAt(bitIndex) != orgBitArray[chunkId].charAt(bitIndex)) {
-                    tpBrokenChunks.add(chunkId);
-                }
+    private int setSumSize = 0;
+
+    public boolean checkWithOriginal(Set<Integer> sus, Set<Integer> tp) {
+        Set<Integer> all = new HashSet<>();
+        all.addAll(sus);
+        all.addAll(tp);
+        setSumSize = all.size();
+        for (int index : all) {
+            if (sus.contains(index) && tp.contains(index)) {
+                tpBrokenChunks.add(index);
+            } else if (sus.contains(index)) {
+                fpBrokenChunks.add(index);
+            } else {
+                fnBrokenChunks.add(index);
             }
-//            if (brokenChunks.contains(chunkId)) {
-//                System.out.println("sus = " + susBitArray[chunkId]);
-//                System.out.println("org = " + orgBitArray[chunkId]);
-//            }
         }
-        return tpBrokenChunks.isEmpty();
-    }
-
-    public boolean checkChunkDetectionAccuracy(Set<Integer> susChunks){
-        for(Integer index: susChunks){
-            if(tpBrokenChunks.contains(index)){
-                continue;
-            }
-            fpBrokenChunks.add(index);
-        }
-        return fpBrokenChunks.isEmpty();
-    }
-
-    public void saveData(StringBuilder[] bitArray) {
-        this.orgBitArray = new StringBuilder[bitArray.length];
-        for (int i = 0; i < bitArray.length; i++) {
-            this.orgBitArray[i] = new StringBuilder(bitArray[i].toString());
-        }
+        return fpBrokenChunks.isEmpty() && fnBrokenChunks.isEmpty();
     }
 
     public Set<Integer> getTPBrokenChunks() {
@@ -50,4 +35,11 @@ public class DataChecker {
         return fpBrokenChunks;
     }
 
+    public Set<Integer> getFNBrokenChunks() {
+        return fnBrokenChunks;
+    }
+
+    public int getSetSumSize(){
+        return setSumSize;
+    }
 }
