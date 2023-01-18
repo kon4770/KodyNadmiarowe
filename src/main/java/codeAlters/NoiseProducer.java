@@ -34,7 +34,6 @@ public class NoiseProducer {
             contaminatedData[chunkId] = flipBit(contaminatedData[chunkId], bitIdInsideChunk);
             contaminatedChunkSet.add(chunkId);
         }
-        System.out.println(cleanData.length);
 
         return contaminatedData;
     }

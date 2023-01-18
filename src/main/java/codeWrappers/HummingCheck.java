@@ -49,7 +49,7 @@ public class HummingCheck implements WrapperInterface {
         Set<Integer> onePositions;
         Map<Integer, Integer> normalizedChunkIndexes = new HashMap<>();
         int trueIndex = 0;
-        for (int i = 0; i < bitArray[0].length(); i++) {
+        for (int i = 1; i < bitArray[0].length(); i++) {
             if (parityBitLocations.contains(i)) {
                 continue;
             }
@@ -71,25 +71,24 @@ public class HummingCheck implements WrapperInterface {
                 j++;
             }
             int xorOfSet = xorOfArray(onePositions);
-            Set<Integer> falseBitsToFlip = getBitsToFlip(xorOfSet);
-            for (int falseIndex : falseBitsToFlip) {
-                Integer index = normalizedChunkIndexes.get(falseIndex);
-                if (index == null) {
-                    if (chunk[falseIndex] == '1') {
-                        onePositions.remove(falseIndex);
+            if (xorOfSet!=0) {
+                chunkToResendList.add(i);
+            }
+            Integer index = normalizedChunkIndexes.get(xorOfSet);
+            if(index==null){
+                if (bitArray[i].charAt(xorOfSet) == '1') {
+                        onePositions.remove(xorOfSet);
                     } else {
-                        chunk[falseIndex] = '1';
-                        onePositions.add(falseIndex);
+                        onePositions.add(xorOfSet);
                     }
-                } else {
-                    if (chunk[index] == '1') {
+            }else{
+                if (chunk[index] == '1') {
                         chunk[index] = '0';
                         onePositions.remove(index);
                     } else {
                         chunk[index] = '1';
                         onePositions.add(index);
                     }
-                }
             }
             if (onePositions.size() % 2 == bitArray[i].charAt(0)) {
                 chunkToResendList.add(i);
