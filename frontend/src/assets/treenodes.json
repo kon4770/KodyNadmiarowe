@@ -1,0 +1,72 @@
+{
+  "root": [
+    {
+      "key": "0",
+      "label": "Error Detection",
+      "data": "Error Detection Folder",
+      "icon": "pi pi-check-square",
+      "children": [
+        {
+          "key": "0-0",
+          "label": "Chunk Number Altering",
+          "data": "Chunk Number Altering Folder",
+          "icon": "pi pi-plus-circle",
+          "children": [
+            {
+              "key": "0-0-0",
+              "label": "TwoDimensionalParityCheck",
+              "icon": "pi pi-fw pi-file",
+              "data": "TwoDimParityCheck"
+            }
+          ]
+        },
+        {
+          "key": "0-1",
+          "label": "Chunk Number Non-Altering",
+          "data": "Chunk Number Non-Altering Folder",
+          "icon": "pi pi-stop-circle",
+          "children": [
+            {
+              "key": "0-1-0",
+              "label": "SimpleParityCheck",
+              "icon": "pi pi-fw pi-file",
+              "data": "SimpleParityCheck"
+            },
+            {
+              "key": "0-1-1",
+              "label": "CyclicRedundancyCheck",
+              "icon": "pi pi-fw pi-file",
+              "data": "CyclicRedundancyCheck"
+            },
+            {
+              "key": "0-1-2",
+              "label": "ISBNCheck",
+              "icon": "pi pi-fw pi-file",
+              "data": "ISBNCheck"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "1",
+      "label": "Error Correction",
+      "data": "Events Folder",
+      "icon": "pi pi-replay",
+      "children": [
+        {
+          "key": "1-0",
+          "label": "HummingCheck",
+          "icon": "pi pi-fw pi-calendar-plus",
+          "data": "HummingCheck"
+        },
+        {
+          "key": "1-1",
+          "label": "SimpleRepetitionCheck",
+          "icon": "pi pi-fw pi-calendar-plus",
+          "data": "SimpleRepetitionCheck"
+        }
+      ]
+    }
+  ]
+}
